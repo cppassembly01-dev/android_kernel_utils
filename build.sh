@@ -10,6 +10,7 @@ tar -xvf clang-r547379.tar.gz -C clang-r547379
 
 CLANG=/workspaces/alioth_ath9k_htc/clang-r547379/bin
 GCC=/workspaces/alioth_ath9k_htc/arm-gnu-toolchain-14.3.rel1-x86_64-aarch64-none-linux-gnu/bin
-PATH=$CLANG:$GCC::$PATH
+PATH=$CLANG:$GCC:$PATH
+export LINKER=ld.lld
 
-make O=out ARCH=arm64 SUBARCH=arm64 CC=clang LD=ld.lld LLVM_IAS=0 CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-none-linux-gnu- -j4
+make O=out ARCH=arm64 SUBARCH=arm64 LLVM=1 LLVM_IAS=1 CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-none-linux-gnu- -j4
