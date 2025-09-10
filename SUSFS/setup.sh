@@ -51,12 +51,8 @@ setup_kernelsu() {
     else
         git checkout "$1" && echo "[-] Checked out $1." || echo "[-] Checkout default branch"
     fi
-    cp $GKI_ROOT/kconfig.patch .
-    cp $GKI_ROOT/core_hook.patch .
-    cp $GKI_ROOT/Makefile.patch .
-    patch -p1 < kconfig.patch
-    patch -p1 < Makefile.patch
-    patch -p1 < core_hook.patch
+    cp $GKI_ROOT/susfs-1.5.9-a13-5.15.patch .
+    patch -p1 < susfs-1.5.9-a13-5.15.patch
     cd "$DRIVER_DIR"
     ln -sf "$(realpath --relative-to="$DRIVER_DIR" "$GKI_ROOT/KernelSU-Next/kernel")" "kernelsu" && echo "[+] Symlink created."
 
