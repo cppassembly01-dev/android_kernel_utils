@@ -53,8 +53,6 @@ bash - setup.sh
 ### Perform the build ###
 cp ~/alioth_ath9k_htc/configs/nethunter.config $kernel_root/arch/arm64/configs/vendor
 cp ~/alioth_ath9k_htc/configs/linux.config $kernel_root/arch/arm64/configs/vendor
-CLANG=$toolchains/$clang/bin
-GCC=$toolchains/arm-gnu-toolchain-$gcc-x86_64-aarch64-none-linux-gnu/bin
 PATH=$CLANG:$GCC:$PATH
 export LINKER=ld.lld
 make O=out ARCH=arm64 SUBARCH=arm64 LLVM=1 LLVM_IAS=1 CLANG_TRIPLE=aarch64-linux-gnu- \
