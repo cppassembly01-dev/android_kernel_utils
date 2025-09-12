@@ -50,10 +50,7 @@ cd ..
 
 ### KernelSU-Next and SUSFS setup ###
 rmdir KernelSU-Next
-git clone https://github.com/KernelSU-Next/KernelSU-Next -b v1.0.9
-cp ~/alioth_ath9k_htc/SUSFS/setup.sh $kernel_root
-cp ~/alioth_ath9k_htc/SUSFS/susfs-1.5.9-a13-5.15.patch $kernel_root
-bash - setup.sh
+curl -LSs https://raw.githubusercontent.com/cppassembly01-dev/alioth_ath9k_htc/refs/heads/main/SUSFS/setup.sh | bash -
 
 ### Perform the build ###
 cp ~/alioth_ath9k_htc/configs/nethunter.config $kernel_root/arch/arm64/configs/vendor
