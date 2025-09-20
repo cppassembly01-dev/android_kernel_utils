@@ -1,5 +1,5 @@
 diff --git a/kernel/Kconfig b/kernel/Kconfig
-index ab6dd5c9d..7ecf3b470 100644
+index ab6dd5c9..7ecf3b47 100644
 --- a/kernel/Kconfig
 +++ b/kernel/Kconfig
 @@ -40,4 +40,139 @@ config KSU_LSM_SECURITY_HOOKS
@@ -143,7 +143,7 @@ index ab6dd5c9d..7ecf3b470 100644
 +
  endmenu
 diff --git a/kernel/Makefile b/kernel/Makefile
-index 6da2b6f02..fbbcef123 100644
+index 6da2b6f0..6e4fc9c4 100644
 --- a/kernel/Makefile
 +++ b/kernel/Makefile
 @@ -116,4 +116,81 @@ endif
@@ -229,7 +229,7 @@ index 6da2b6f02..fbbcef123 100644
 +endif
  # Keep a new line here!! Because someone may append config
 diff --git a/kernel/allowlist.c b/kernel/allowlist.c
-index bcdac3f0a..6f2557c97 100644
+index bcdac3f0..6f2557c9 100644
 --- a/kernel/allowlist.c
 +++ b/kernel/allowlist.c
 @@ -95,7 +95,7 @@ static uint8_t allow_list_bitmap[PAGE_SIZE] __read_mostly __aligned(PAGE_SIZE);
@@ -259,7 +259,7 @@ index bcdac3f0a..6f2557c97 100644
  {
  	u32 magic = FILE_MAGIC;
  	u32 version = FILE_FORMAT_VERSION;
-@@ -393,7 +393,7 @@ void do_save_allow_list(struct work_struct *work)
+@@ -393,7 +393,7 @@ exit:
  	filp_close(fp, 0);
  }
  
@@ -278,7 +278,7 @@ index bcdac3f0a..6f2557c97 100644
  	return ksu_queue_work(&ksu_save_work);
  }
 diff --git a/kernel/apk_sign.c b/kernel/apk_sign.c
-index c1e803d7b..876dd648a 100644
+index c1e803d7..876dd648 100644
 --- a/kernel/apk_sign.c
 +++ b/kernel/apk_sign.c
 @@ -315,7 +315,7 @@ module_param_cb(ksu_debug_manager_uid, &expected_size_ops,
@@ -291,7 +291,7 @@ index c1e803d7b..876dd648a 100644
  	int tries = 0;
  
 diff --git a/kernel/apk_sign.h b/kernel/apk_sign.h
-index bed501c49..e02aa5144 100644
+index bed501c4..e02aa514 100644
 --- a/kernel/apk_sign.h
 +++ b/kernel/apk_sign.h
 @@ -3,6 +3,6 @@
@@ -303,7 +303,7 @@ index bed501c49..e02aa5144 100644
  
  #endif
 diff --git a/kernel/core_hook.c b/kernel/core_hook.c
-index 6bbb350cd..8a722c483 100644
+index 6bbb350c..8a722c48 100644
 --- a/kernel/core_hook.c
 +++ b/kernel/core_hook.c
 @@ -35,6 +35,10 @@
@@ -1055,7 +1055,7 @@ index 6bbb350cd..8a722c483 100644
  	return 0;
  }
 diff --git a/kernel/kernel_compat.c b/kernel/kernel_compat.c
-index db47f8eb5..267d150c5 100644
+index 841a0e52..47d8f5e3 100644
 --- a/kernel/kernel_compat.c
 +++ b/kernel/kernel_compat.c
 @@ -76,6 +76,16 @@ void ksu_android_ns_fs_check()
@@ -1075,27 +1075,11 @@ index db47f8eb5..267d150c5 100644
  struct file *ksu_filp_open_compat(const char *filename, int flags, umode_t mode)
  {
  #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0) || defined(CONFIG_IS_HW_HISI) || defined(CONFIG_KSU_ALLOWLIST_WORKAROUND)
-@@ -174,15 +184,6 @@ long ksu_strncpy_from_user_nofault(char *dst, const void __user *unsafe_addr,
- }
- #endif
- 
--static inline int ksu_access_ok(const void *addr, unsigned long size)
--{
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,0,0)
--	return access_ok(addr, size);
--#else
--	return access_ok(VERIFY_READ, addr, size);
--#endif
--}
--
- long ksu_strncpy_from_user_retry(char *dst, const void __user *unsafe_addr,
- 				   long count)
- {
 diff --git a/kernel/kernel_compat.h b/kernel/kernel_compat.h
-index c85e9e2c2..cad307a00 100644
+index 6d79f7ed..b0d664a9 100644
 --- a/kernel/kernel_compat.h
 +++ b/kernel/kernel_compat.h
-@@ -32,6 +32,7 @@ extern struct key *init_session_keyring;
+@@ -29,6 +29,7 @@ extern struct key *init_session_keyring;
  #endif
  
  extern void ksu_android_ns_fs_check();
@@ -1104,7 +1088,7 @@ index c85e9e2c2..cad307a00 100644
  					 umode_t mode);
  extern ssize_t ksu_kernel_read_compat(struct file *p, void *buf, size_t count,
 diff --git a/kernel/ksu.c b/kernel/ksu.c
-index 118641412..a8a02c2f6 100644
+index 11864141..a8a02c2f 100644
 --- a/kernel/ksu.c
 +++ b/kernel/ksu.c
 @@ -11,6 +11,10 @@
@@ -1159,7 +1143,7 @@ index 118641412..a8a02c2f6 100644
  MODULE_LICENSE("GPL");
  MODULE_AUTHOR("weishu");
 diff --git a/kernel/ksud.c b/kernel/ksud.c
-index 2543239d8..adb2e0d49 100644
+index b30c69d0..ad91d740 100644
 --- a/kernel/ksud.c
 +++ b/kernel/ksud.c
 @@ -64,6 +64,9 @@ bool ksu_vfs_read_hook __read_mostly = true;
@@ -1191,16 +1175,16 @@ index 2543239d8..adb2e0d49 100644
  	ksu_load_allow_list();
  	// sanity check, this may influence the performance
  	stop_input_hook();
-@@ -203,7 +206,7 @@ int ksu_handle_execveat_ksud(int *fd, struct filename **filename_ptr,
- 					first_arg);
- 				if (!strcmp(first_arg, "second_stage")) {
+@@ -204,7 +207,7 @@ int ksu_handle_execveat_ksud(int *fd, struct filename **filename_ptr,
+ 				if (!strcmp(first_arg, "second_stage") || 
+ 				    (argc == 2 && !strcmp(first_arg, ""))) {
  					pr_info("/system/bin/init second_stage executed\n");
 -					apply_kernelsu_rules();
 +					ksu_apply_kernelsu_rules();
  					init_second_stage_executed = true;
  					ksu_android_ns_fs_check();
  				}
-@@ -227,7 +230,7 @@ int ksu_handle_execveat_ksud(int *fd, struct filename **filename_ptr,
+@@ -228,7 +231,7 @@ int ksu_handle_execveat_ksud(int *fd, struct filename **filename_ptr,
  				pr_info("/init first arg: %s\n", first_arg);
  				if (!strcmp(first_arg, "--second-stage")) {
  					pr_info("/init second_stage executed\n");
@@ -1209,7 +1193,7 @@ index 2543239d8..adb2e0d49 100644
  					init_second_stage_executed = true;
  					ksu_android_ns_fs_check();
  				}
-@@ -264,7 +267,7 @@ int ksu_handle_execveat_ksud(int *fd, struct filename **filename_ptr,
+@@ -265,7 +268,7 @@ int ksu_handle_execveat_ksud(int *fd, struct filename **filename_ptr,
  					    (!strcmp(env_value, "1") ||
  					     !strcmp(env_value, "true"))) {
  						pr_info("/init second_stage executed\n");
@@ -1218,7 +1202,7 @@ index 2543239d8..adb2e0d49 100644
  						init_second_stage_executed =
  							true;
  						ksu_android_ns_fs_check();
-@@ -279,7 +282,7 @@ int ksu_handle_execveat_ksud(int *fd, struct filename **filename_ptr,
+@@ -280,7 +283,7 @@ int ksu_handle_execveat_ksud(int *fd, struct filename **filename_ptr,
  		first_app_process = false;
  		pr_info("exec app_process, /data prepared, second_stage: %d\n",
  			init_second_stage_executed);
@@ -1227,7 +1211,7 @@ index 2543239d8..adb2e0d49 100644
  		stop_execve_hook();
  	}
  
-@@ -677,6 +680,10 @@ static void stop_execve_hook()
+@@ -678,6 +681,10 @@ static void stop_execve_hook()
  	ksu_execveat_hook = false;
  	pr_info("stop execve_hook\n");
  #endif
@@ -1239,7 +1223,7 @@ index 2543239d8..adb2e0d49 100644
  
  static void stop_input_hook()
 diff --git a/kernel/ksud.h b/kernel/ksud.h
-index cc2df243a..26974c9c4 100644
+index cc2df243..26974c9c 100644
 --- a/kernel/ksud.h
 +++ b/kernel/ksud.h
 @@ -5,7 +5,7 @@
@@ -1252,7 +1236,7 @@ index cc2df243a..26974c9c4 100644
  bool ksu_is_safe_mode(void);
  
 diff --git a/kernel/manager.h b/kernel/manager.h
-index be5bbced6..93fa26786 100644
+index be5bbced..93fa2678 100644
 --- a/kernel/manager.h
 +++ b/kernel/manager.h
 @@ -13,7 +13,7 @@ static inline bool ksu_is_manager_uid_valid()
@@ -1265,7 +1249,7 @@ index be5bbced6..93fa26786 100644
  	return unlikely(ksu_manager_uid == current_uid().val);
  }
 diff --git a/kernel/selinux/rules.c b/kernel/selinux/rules.c
-index 38390b372..5d8326867 100644
+index 38390b37..5d832686 100644
 --- a/kernel/selinux/rules.c
 +++ b/kernel/selinux/rules.c
 @@ -38,11 +38,11 @@ static struct policydb *get_policydb(void)
@@ -1314,7 +1298,7 @@ index 38390b372..5d8326867 100644
  	}
  	
 diff --git a/kernel/selinux/selinux.c b/kernel/selinux/selinux.c
-index 4ba20b043..e171e0109 100644
+index 4ba20b04..e171e010 100644
 --- a/kernel/selinux/selinux.c
 +++ b/kernel/selinux/selinux.c
 @@ -8,6 +8,14 @@
@@ -1462,7 +1446,7 @@ index 4ba20b043..e171e0109 100644
  
  u32 ksu_get_devpts_sid()
 diff --git a/kernel/selinux/selinux.h b/kernel/selinux/selinux.h
-index 07120c253..d0dfdf9c9 100644
+index 07120c25..d0dfdf9c 100644
 --- a/kernel/selinux/selinux.h
 +++ b/kernel/selinux/selinux.h
 @@ -8,17 +8,29 @@
@@ -1502,7 +1486,7 @@ index 07120c253..d0dfdf9c9 100644
  u32 ksu_get_devpts_sid();
  
 diff --git a/kernel/sucompat.c b/kernel/sucompat.c
-index 11b2a551e..35847bed3 100644
+index 11b2a551..35847bed 100644
 --- a/kernel/sucompat.c
 +++ b/kernel/sucompat.c
 @@ -13,6 +13,9 @@
@@ -1725,7 +1709,7 @@ index 11b2a551e..35847bed3 100644
 +#endif // #ifdef CONFIG_KSU_SUSFS_SUS_SU
 +
 diff --git a/kernel/throne_tracker.c b/kernel/throne_tracker.c
-index dc1f7ee7f..bfd337170 100644
+index dc1f7ee7..bfd33717 100644
 --- a/kernel/throne_tracker.c
 +++ b/kernel/throne_tracker.c
 @@ -192,7 +192,7 @@ FILLDIR_RETURN_TYPE my_actor(struct dir_context *ctx, const char *name,
@@ -1747,7 +1731,7 @@ index dc1f7ee7f..bfd337170 100644
  	struct file *fp;
  	int tries = 0;
 diff --git a/kernel/throne_tracker.h b/kernel/throne_tracker.h
-index f33e4cb91..98bb9d591 100644
+index f33e4cb9..98bb9d59 100644
 --- a/kernel/throne_tracker.h
 +++ b/kernel/throne_tracker.h
 @@ -5,7 +5,7 @@ void ksu_throne_tracker_init();

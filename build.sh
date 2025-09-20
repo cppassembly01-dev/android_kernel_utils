@@ -14,8 +14,8 @@ CLANG=$toolchains/$clang/bin
 gcc=14.3.rel1
 GCC=$toolchains/arm-gnu-toolchain-$gcc-x86_64-aarch64-none-linux-gnu/bin
 
-kernel_source=https://github.com/raystef66/InfiniR_kernel_alioth
-kernel_root=~/InfiniR_kernel_alioth
+kernel_source=https://github.com/cppassembly01-dev/Droidlinux_kernel_alioth
+kernel_root=~/Droidlinux_kernel_alioth
 
 PATH=$CLANG:$GCC:$PATH
 export LINKER=ld.lld
