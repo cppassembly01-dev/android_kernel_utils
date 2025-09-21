@@ -8,29 +8,41 @@ sudo apt-get install git-core gnupg flex bison build-essential zip curl zlib1g-d
 ### Environment variables ###
 toolchains=~
 
+HOST_ARCH=`arch`
+
+if [ $HOST_ARCH == amd64 ]; then
 clang=clang-r547379
 CLANG=$toolchains/$clang/bin
+fi
+
+elif [ $HOST_ARCH == aarch64 ]; then
+CLANG=$toolchains/
+fi
 
 gcc=14.3.rel1
-GCC=$toolchains/arm-gnu-toolchain-$gcc-x86_64-aarch64-none-linux-gnu/bin
+GCC=$toolchains/arm-gnu-toolchain-$gcc-$HOST_ARCH-aarch64-none-linux-gnu/bin
 
 kernel_source=https://github.com/cppassembly01-dev/Droidlinux_kernel_alioth
 kernel_root=~/Droidlinux_kernel_alioth
 
 PATH=$CLANG:$GCC:$PATH
 export LINKER=ld.lld
+export KBUILD_BUILD_USER=akronnos
+export KBUILD_BUILD_HOST=kali
 
 ### Clang toolchain ###
+if [ $HOST_ARCH == amd64 ]; then
 cd $toolchains
 wget https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz
 mkdir $clang
 tar -xvf $clang.tar.gz -C $clang
+fi
 
 ### GCC toolchain ###
-wget https://developer.arm.com/-/media/Files/downloads/gnu/$gcc/binrel/arm-gnu-toolchain-$gcc-x86_64-aarch64-none-linux-gnu.tar.xz
-mkdir arm-gnu-toolchain-$gcc-x86_64-aarch64-none-linux-gnu
-tar -xvf arm-gnu-toolchain-$gcc-x86_64-aarch64-none-linux-gnu.tar.xz -C \
-arm-gnu-toolchain-$gcc-x86_64-aarch64-none-linux-gnu
+wget https://developer.arm.com/-/media/Files/downloads/gnu/$gcc/binrel/arm-gnu-toolchain-$gcc-$HOST_ARCH-aarch64-none-linux-gnu.tar.xz
+mkdir arm-gnu-toolchain-$gcc-$HOST_ARCH-aarch64-none-linux-gnu
+tar -xvf arm-gnu-toolchain-$gcc-$HOST_ARCH-aarch64-none-linux-gnu.tar.xz -C \
+arm-gnu-toolchain-$gcc-$HOST_ARCH-aarch64-none-linux-gnu
 
 ### Download the kernel source ###
 git clone $kernel_source
