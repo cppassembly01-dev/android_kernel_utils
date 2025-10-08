@@ -1,0 +1,24 @@
+diff --git a/kernel/sched/fair.c b/kernel/sched/fair.c
+index 1e4e8d4f7..bb84068c5 100644
+--- a/kernel/sched/fair.c
++++ b/kernel/sched/fair.c
+@@ -13468,3 +13468,7 @@ void check_for_migration(struct rq *rq, struct task_struct *p)
+ }
+
+ #endif /* CONFIG_SCHED_WALT */
++
++#ifdef CONFIG_CFS_BANDWIDTH
++u64 max_cfs_runtime = 0;
++#endif
+diff --git a/kernel/sched/sched.h b/kernel/sched/sched.h
+index dd70a20d9..3aaea8996 100644
+--- a/kernel/sched/sched.h
++++ b/kernel/sched/sched.h
+@@ -3333,3 +3333,7 @@ void __weak init_task_runtime_info(struct task_struct *tsk)
+        return;
+ }
+ #endif
++
++#ifdef CONFIG_CFS_BANDWIDTH
++extern u64 max_cfs_runtime;
++#endif
