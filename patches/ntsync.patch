@@ -1,0 +1,153 @@
+diff --git a/drivers/misc/Kconfig b/drivers/misc/Kconfig
+index 796561ccc..bd004ab50 100644
+--- a/drivers/misc/Kconfig
++++ b/drivers/misc/Kconfig
+@@ -4,6 +4,17 @@
+ 
+ menu "Misc devices"
+ 
++config NTSYNC
++        tristate "NT synchronization primitive emulation"
++        help
++          This module provides kernel support for emulation of Windows NT
++          synchronization primitives. It is not a hardware driver.
++
++          To compile this driver as a module, choose M here: the
++          module will be called ntsync.
++
++          If unsure, say N.
++
+ config SPI_XIAOMI_TP
+         bool
+         depends on SPI
+diff --git a/drivers/misc/Makefile b/drivers/misc/Makefile
+index 65da65cc0..51cda9f44 100644
+--- a/drivers/misc/Makefile
++++ b/drivers/misc/Makefile
+@@ -2,7 +2,7 @@
+ #
+ # Makefile for misc devices that really don't fit anywhere else.
+ #
+-
++obj-$(CONFIG_NTSYNC)            += ntsync.o
+ obj-$(CONFIG_IBM_ASM)		+= ibmasm/
+ obj-$(CONFIG_IBMVMC)		+= ibmvmc.o
+ obj-$(CONFIG_AD525X_DPOT)	+= ad525x_dpot.o
+--- ../ASB/drivers/misc/ntsync.c	2025-10-08 13:42:10.450000000 -0300
++++ drivers/misc/ntsync.c	2025-10-08 15:36:27.668479705 -0300
+@@ -4,7 +4,6 @@
+  *
+  * Copyright (C) 2024 Elizabeth Figura <zfigura@codeweavers.com>
+  */
+-
+ #include <linux/anon_inodes.h>
+ #include <linux/atomic.h>
+ #include <linux/file.h>
+@@ -12,6 +11,7 @@
+ #include <linux/hrtimer.h>
+ #include <linux/ktime.h>
+ #include <linux/miscdevice.h>
++#include <linux/uaccess.h>
+ #include <linux/module.h>
+ #include <linux/mutex.h>
+ #include <linux/overflow.h>
+@@ -149,8 +149,6 @@
+ 
+ static void dev_lock_obj(struct ntsync_device *dev, struct ntsync_obj *obj)
+ {
+-	lockdep_assert_held(&dev->wait_all_lock);
+-	lockdep_assert(obj->dev == dev);
+ 	spin_lock(&obj->lock);
+ 	/*
+ 	 * By setting obj->dev_locked inside obj->lock, it is ensured that
+@@ -162,8 +160,6 @@
+ 
+ static void dev_unlock_obj(struct ntsync_device *dev, struct ntsync_obj *obj)
+ {
+-	lockdep_assert_held(&dev->wait_all_lock);
+-	lockdep_assert(obj->dev == dev);
+ 	spin_lock(&obj->lock);
+ 	obj->dev_locked = 0;
+ 	spin_unlock(&obj->lock);
+@@ -186,7 +182,6 @@
+ 		 * wait_all_lock section, since we now own this lock, it should
+ 		 * be clear.
+ 		 */
+-		lockdep_assert(!obj->dev_locked);
+ 		spin_unlock(&obj->lock);
+ 		mutex_unlock(&dev->wait_all_lock);
+ 	}
+@@ -222,10 +217,7 @@
+ 	}
+ }
+ 
+-#define ntsync_assert_held(obj) \
+-	lockdep_assert((lockdep_is_held(&(obj)->lock) != LOCK_STATE_NOT_HELD) || \
+-		       ((lockdep_is_held(&(obj)->dev->wait_all_lock) != LOCK_STATE_NOT_HELD) && \
+-			(obj)->dev_locked))
++#define ntsync_assert_held(obj) do { } while (0)
+ 
+ static bool is_signaled(struct ntsync_obj *obj, __u32 owner)
+ {
+@@ -259,10 +251,6 @@
+ 	int signaled = -1;
+ 	__u32 i;
+ 
+-	lockdep_assert_held(&dev->wait_all_lock);
+-	if (locked_obj)
+-		lockdep_assert(locked_obj->dev_locked);
+-
+ 	for (i = 0; i < count; i++) {
+ 		if (q->entries[i].obj != locked_obj)
+ 			dev_lock_obj(dev, q->entries[i].obj);
+@@ -309,8 +297,6 @@
+ {
+ 	struct ntsync_q_entry *entry;
+ 
+-	lockdep_assert_held(&dev->wait_all_lock);
+-	lockdep_assert(obj->dev_locked);
+ 
+ 	list_for_each_entry(entry, &obj->all_waiters, node)
+ 		try_wake_all(dev, entry->q, obj);
+@@ -321,7 +307,6 @@
+ 	struct ntsync_q_entry *entry;
+ 
+ 	ntsync_assert_held(sem);
+-	lockdep_assert(sem->type == NTSYNC_TYPE_SEM);
+ 
+ 	list_for_each_entry(entry, &sem->any_waiters, node) {
+ 		struct ntsync_q *q = entry->q;
+@@ -342,7 +327,6 @@
+ 	struct ntsync_q_entry *entry;
+ 
+ 	ntsync_assert_held(mutex);
+-	lockdep_assert(mutex->type == NTSYNC_TYPE_MUTEX);
+ 
+ 	list_for_each_entry(entry, &mutex->any_waiters, node) {
+ 		struct ntsync_q *q = entry->q;
+@@ -369,7 +353,6 @@
+ 	struct ntsync_q_entry *entry;
+ 
+ 	ntsync_assert_held(event);
+-	lockdep_assert(event->type == NTSYNC_TYPE_EVENT);
+ 
+ 	list_for_each_entry(entry, &event->any_waiters, node) {
+ 		struct ntsync_q *q = entry->q;
+@@ -697,7 +680,7 @@
+ 	.owner		= THIS_MODULE,
+ 	.release	= ntsync_obj_release,
+ 	.unlocked_ioctl	= ntsync_obj_ioctl,
+-	.compat_ioctl	= compat_ptr_ioctl,
++	.compat_ioctl	= ntsync_obj_ioctl,
+ };
+ 
+ static struct ntsync_obj *ntsync_alloc_obj(struct ntsync_device *dev,
+@@ -1201,7 +1184,7 @@
+ 	.open		= ntsync_char_open,
+ 	.release	= ntsync_char_release,
+ 	.unlocked_ioctl	= ntsync_char_ioctl,
+-	.compat_ioctl	= compat_ptr_ioctl,
++	.compat_ioctl	= ntsync_char_ioctl,
+ };
+ 
+ static struct miscdevice ntsync_misc = {
