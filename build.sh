@@ -6,7 +6,7 @@ sudo apt upgrade -y
 sudo apt-get install -y git-core gnupg flex bison build-essential zip curl zlib1g-dev libc6-dev-i386 x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig bc libssl-dev flex
 
 ### Environment variables ###
-workdir=~
+workdir=~/workdir
 
 HOST_ARCH=`arch`
 
@@ -14,8 +14,8 @@ if [ $HOST_ARCH == x86_64 ]; then
 clang=clang-r547379
 CLANG=$workdir/$clang/bin; fi
 
-if [ $HOST_ARCH == aarch64 ]; then
-CLANG=$workdir; fi
+#if [ $HOST_ARCH == aarch64 ]; then
+#CLANG=$workdir; fi
 
 gcc=14.3.rel1
 GCC=$workdir/arm-gnu-toolchain-$gcc-$HOST_ARCH-aarch64-none-linux-gnu/bin
@@ -26,12 +26,12 @@ kernel_root=~/Droidlinux_kernel_alioth
 PATH=$CLANG:$GCC:$PATH
 export LINKER=ld.lld
 export KBUILD_BUILD_USER=akronnos
-export KBUILD_BUILD_HOST=nethunter
+export KBUILD_BUILD_HOST=archlinux
 
 ### Clang toolchain ###
 if [ $HOST_ARCH == x86_64 ]; then
 cd $workdir
-wget https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/android16-release/clang-r547379.tar.gz
+wget https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/android16-release/$clang.tar.gz
 mkdir $clang
 tar -xvf $clang.tar.gz -C $clang
 rm $clang.tar.gz
@@ -75,3 +75,7 @@ make O=out ARCH=arm64 SUBARCH=arm64 LLVM=1 LLVM_IAS=1 CLANG_TRIPLE=aarch64-linux
 CROSS_COMPILE=aarch64-none-linux-gnu- alioth_defconfig vendor/nethunter.config vendor/linux.config
 make O=out ARCH=arm64 SUBARCH=arm64 LLVM=1 LLVM_IAS=1 CLANG_TRIPLE=aarch64-linux-gnu- \
 CROSS_COMPILE=aarch64-none-linux-gnu- -j$(nproc --all)
+cp out/arch/arm64/boot/Image.gz-dtb out/arch/arm64/boot/dtbo.img AnyKernel3
+cd AnyKernel3
+zip -r9 "DLK_alioth.zip" *
+
