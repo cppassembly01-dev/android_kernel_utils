@@ -1,0 +1,13 @@
+diff --git a/drivers/net/can/usb/peak_usb/pcan_usb_pro.c b/drivers/net/can/usb/peak_usb/pcan_usb_pro.c
+index b304198f0b3a..6387d0f46b32 100644
+--- a/drivers/net/can/usb/peak_usb/pcan_usb_pro.c
++++ b/drivers/net/can/usb/peak_usb/pcan_usb_pro.c
+@@ -127,7 +127,7 @@ static u8 *pcan_msg_init_empty(struct pcan_usb_pro_msg *pm,
+ /*
+  * add one record to a message being built
+  */
+-static int pcan_msg_add_rec(struct pcan_usb_pro_msg *pm, u8 id, ...)
++static int pcan_msg_add_rec(struct pcan_usb_pro_msg *pm, int id, ...)
+ {
+ 	int len, i;
+ 	u8 *pc;
