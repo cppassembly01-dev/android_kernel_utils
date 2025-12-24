@@ -11,3 +11,18 @@ index afd447ac457e..09d5c282f50e 100644
  {
  	struct nfs_readdesc *desc = (struct nfs_readdesc *)data;
  	struct nfs_page *new;
+diff --git a/fs/nfs/client.c b/fs/nfs/client.c
+index 548e55f84100..3de18948f097 100644
+--- a/fs/nfs/client.c
++++ b/fs/nfs/client.c
+@@ -609,8 +609,8 @@ int nfs_init_server_rpcclient(struct nfs_server *server,
+ 			sizeof(server->client->cl_timeout_default));
+ 	server->client->cl_timeout = &server->client->cl_timeout_default;
+ 	server->client->cl_softrtry = 0;
+-	if (server->flags & NFS_MOUNT_SOFTERR)
+-		server->client->cl_softerr = 1;
++	/*if (server->flags & NFS_MOUNT_SOFTERR)
++		server->client->cl_softerr = 1;*/
+ 	if (server->flags & NFS_MOUNT_SOFT)
+ 		server->client->cl_softrtry = 1;
+ 
